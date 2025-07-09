@@ -1,11 +1,10 @@
-const UserPackage = require('./userPackage.model');
-const Wash = require('../wash/wash.model');
-const User = require('../user/user.model');
-const Car = require('../car/car.model');
-const Package = require('./package.model');
-const WashingPlace = require('../washingPlace/washingPlace.model');
-const { sendNotification } = require('../../services/notification');
-const cron = require('node-cron');
+const UserPackage = require("./userPackage.model");
+const Wash = require("../wash/wash.model");
+const User = require("../user/user.model");
+const Car = require("../car/car.model");
+const Package = require("./package.model");
+const WashingPlace = require("../washingPlace/washingPlace.model");
+const { sendNotification } = require("../../services/notification");
 
 exports.createPackage = async (req, res) => {
   try {
@@ -29,7 +28,7 @@ exports.getPackages = async (req, res) => {
 exports.getPackage = async (req, res) => {
   try {
     const pkg = await Package.findById(req.params.id);
-    if (!pkg) return res.status(404).json({ error: 'Package not found' });
+    if (!pkg) return res.status(404).json({ error: "Package not found" });
     res.json(pkg);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -38,8 +37,10 @@ exports.getPackage = async (req, res) => {
 
 exports.updatePackage = async (req, res) => {
   try {
-    const pkg = await Package.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!pkg) return res.status(404).json({ error: 'Package not found' });
+    const pkg = await Package.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (!pkg) return res.status(404).json({ error: "Package not found" });
     res.json(pkg);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -49,8 +50,8 @@ exports.updatePackage = async (req, res) => {
 exports.deletePackage = async (req, res) => {
   try {
     const pkg = await Package.findByIdAndDelete(req.params.id);
-    if (!pkg) return res.status(404).json({ error: 'Package not found' });
-    res.json({ message: 'Package deleted' });
+    if (!pkg) return res.status(404).json({ error: "Package not found" });
+    res.json({ message: "Package deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -60,36 +61,40 @@ exports.deletePackage = async (req, res) => {
 exports.scanQRCode = async (req, res) => {
   try {
     // Only allow owners
-    if (!req.user || req.user.role !== 'owner') {
-      return res.status(403).json({ error: 'Access denied' });
+    if (!req.user || req.user.role !== "owner") {
+      return res.status(403).json({ error: "Access denied" });
     }
     const { barcode, washingPlaceId } = req.body;
     if (!barcode || !washingPlaceId) {
-      return res.status(400).json({ error: 'Barcode and washingPlaceId are required' });
+      return res
+        .status(400)
+        .json({ error: "Barcode and washingPlaceId are required" });
     }
     // Find the user package by barcode
-    const userPackage = await UserPackage.findOne({ barcode }).populate('user car package');
+    const userPackage = await UserPackage.findOne({ barcode }).populate(
+      "user car package"
+    );
     if (!userPackage) {
-      return res.status(404).json({ error: 'User package not found' });
+      return res.status(404).json({ error: "User package not found" });
     }
     // Validate package
-    if (userPackage.status !== 'active') {
-      return res.status(400).json({ error: 'Package is not active' });
+    if (userPackage.status !== "active") {
+      return res.status(400).json({ error: "Package is not active" });
     }
     if (userPackage.expiry < new Date()) {
-      userPackage.status = 'expired';
+      userPackage.status = "expired";
       await userPackage.save();
-      return res.status(400).json({ error: 'Package has expired' });
+      return res.status(400).json({ error: "Package has expired" });
     }
     if (userPackage.washesLeft <= 0) {
-      userPackage.status = 'used';
+      userPackage.status = "used";
       await userPackage.save();
-      return res.status(400).json({ error: 'No washes left in this package' });
+      return res.status(400).json({ error: "No washes left in this package" });
     }
     // Decrement washesLeft
     userPackage.washesLeft -= 1;
     if (userPackage.washesLeft === 0) {
-      userPackage.status = 'used';
+      userPackage.status = "used";
     }
     await userPackage.save();
     // Create a new wash record
@@ -98,7 +103,7 @@ exports.scanQRCode = async (req, res) => {
       car: userPackage.car._id,
       washingPlace: washingPlaceId,
       package: userPackage.package._id,
-      status: 'scheduled',
+      status: "scheduled",
     });
     await wash.save();
 
@@ -106,13 +111,18 @@ exports.scanQRCode = async (req, res) => {
     setTimeout(async () => {
       await sendNotification({
         user: userPackage.user._id,
-        type: 'feedback',
-        message: 'يرجى تقييم تجربتك مع محطة الغسيل وإضافة صورة لسيارتك بعد الغسيل!',
+        type: "feedback",
+        message:
+          "يرجى تقييم تجربتك مع محطة الغسيل وإضافة صورة لسيارتك بعد الغسيل!",
         relatedWash: wash._id,
       });
     }, 30 * 60 * 1000); // 30 minutes in milliseconds
 
-    res.json({ message: 'Wash started', washesLeft: userPackage.washesLeft, wash });
+    res.json({
+      message: "Wash started",
+      washesLeft: userPackage.washesLeft,
+      wash,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -122,36 +132,40 @@ exports.scanQRCode = async (req, res) => {
 exports.startWash = async (req, res) => {
   try {
     // Only allow owners
-    if (!req.user || req.user.role !== 'owner') {
-      return res.status(403).json({ error: 'Access denied' });
+    if (!req.user || req.user.role !== "owner") {
+      return res.status(403).json({ error: "Access denied" });
     }
     const { barcode, washingPlaceId } = req.body;
     if (!barcode || !washingPlaceId) {
-      return res.status(400).json({ error: 'Barcode and washingPlaceId are required' });
+      return res
+        .status(400)
+        .json({ error: "Barcode and washingPlaceId are required" });
     }
     // Find the user package by barcode
-    const userPackage = await UserPackage.findOne({ barcode }).populate('user car package');
+    const userPackage = await UserPackage.findOne({ barcode }).populate(
+      "user car package"
+    );
     if (!userPackage) {
-      return res.status(404).json({ error: 'User package not found' });
+      return res.status(404).json({ error: "User package not found" });
     }
     // Validate package
-    if (userPackage.status !== 'active') {
-      return res.status(400).json({ error: 'Package is not active' });
+    if (userPackage.status !== "active") {
+      return res.status(400).json({ error: "Package is not active" });
     }
     if (userPackage.expiry < new Date()) {
-      userPackage.status = 'expired';
+      userPackage.status = "expired";
       await userPackage.save();
-      return res.status(400).json({ error: 'Package has expired' });
+      return res.status(400).json({ error: "Package has expired" });
     }
     if (userPackage.washesLeft <= 0) {
-      userPackage.status = 'used';
+      userPackage.status = "used";
       await userPackage.save();
-      return res.status(400).json({ error: 'No washes left in this package' });
+      return res.status(400).json({ error: "No washes left in this package" });
     }
     // Decrement washesLeft
     userPackage.washesLeft -= 1;
     if (userPackage.washesLeft === 0) {
-      userPackage.status = 'used';
+      userPackage.status = "used";
     }
     await userPackage.save();
     // Create a new wash record
@@ -160,7 +174,7 @@ exports.startWash = async (req, res) => {
       car: userPackage.car._id,
       washingPlace: washingPlaceId,
       package: userPackage.package._id,
-      status: 'scheduled',
+      status: "scheduled",
     });
     await wash.save();
 
@@ -168,13 +182,18 @@ exports.startWash = async (req, res) => {
     setTimeout(async () => {
       await sendNotification({
         user: userPackage.user._id,
-        type: 'feedback',
-        message: 'يرجى تقييم تجربتك مع محطة الغسيل وإضافة صورة لسيارتك بعد الغسيل!',
+        type: "feedback",
+        message:
+          "يرجى تقييم تجربتك مع محطة الغسيل وإضافة صورة لسيارتك بعد الغسيل!",
         relatedWash: wash._id,
       });
     }, 30 * 60 * 1000); // 30 minutes in milliseconds
 
-    res.json({ message: 'Wash started', washesLeft: userPackage.washesLeft, wash });
+    res.json({
+      message: "Wash started",
+      washesLeft: userPackage.washesLeft,
+      wash,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -184,31 +203,33 @@ exports.startWash = async (req, res) => {
 exports.scanInfo = async (req, res) => {
   try {
     // Only allow owners
-    if (!req.user || req.user.role !== 'owner') {
-      return res.status(403).json({ error: 'Access denied' });
+    if (!req.user || req.user.role !== "owner") {
+      return res.status(403).json({ error: "Access denied" });
     }
     const { barcode } = req.body;
     if (!barcode) {
-      return res.status(400).json({ error: 'Barcode is required' });
+      return res.status(400).json({ error: "Barcode is required" });
     }
     // Find the user package by barcode
-    const userPackage = await UserPackage.findOne({ barcode }).populate('user car package');
+    const userPackage = await UserPackage.findOne({ barcode }).populate(
+      "user car package"
+    );
     if (!userPackage) {
-      return res.status(404).json({ error: 'User package not found' });
+      return res.status(404).json({ error: "User package not found" });
     }
     // Validate package
-    if (userPackage.status !== 'active') {
-      return res.status(400).json({ error: 'Package is not active' });
+    if (userPackage.status !== "active") {
+      return res.status(400).json({ error: "Package is not active" });
     }
     if (userPackage.expiry < new Date()) {
-      userPackage.status = 'expired';
+      userPackage.status = "expired";
       await userPackage.save();
-      return res.status(400).json({ error: 'Package has expired' });
+      return res.status(400).json({ error: "Package has expired" });
     }
     if (userPackage.washesLeft <= 0) {
-      userPackage.status = 'used';
+      userPackage.status = "used";
       await userPackage.save();
-      return res.status(400).json({ error: 'No washes left in this package' });
+      return res.status(400).json({ error: "No washes left in this package" });
     }
     // Return user, car, package, washesLeft
     res.json({
@@ -221,4 +242,4 @@ exports.scanInfo = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-}; 
+};
