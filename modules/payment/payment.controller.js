@@ -191,7 +191,7 @@ exports.createHyperpayCheckout = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.response?.data || error.message });
   }
-};
+}; 
 
 // Test endpoint for payment result (for debugging)
 exports.testPaymentResult = async (req, res) => {
