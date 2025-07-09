@@ -77,4 +77,36 @@ exports.getFeedbacksForWashingPlace = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+};
+
+exports.getNearestWashingPlaces = async (req, res) => {
+  try {
+    const { lat, lng } = req.query;
+    if (!lat || !lng) return res.status(400).json({ error: 'lat and lng required' });
+    // Find all washing places
+    const washingPlaces = await WashingPlace.find();
+    // Calculate distance and average rating for each
+    const results = await Promise.all(washingPlaces.map(async (wp) => {
+      // Haversine formula
+      const R = 6371; // km
+      const dLat = (wp.location.lat - lat) * Math.PI / 180;
+      const dLng = (wp.location.lng - lng) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat * Math.PI / 180) * Math.cos(wp.location.lat * Math.PI / 180) * Math.sin(dLng/2) * Math.sin(dLng/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const distance = R * c;
+      // Get average rating
+      const feedbacks = await Feedback.find({ washingPlace: wp._id });
+      const avgRating = feedbacks.length ? feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length : null;
+      return {
+        ...wp.toObject(),
+        distance,
+        avgRating,
+      };
+    }));
+    // Sort by distance
+    results.sort((a, b) => a.distance - b.distance);
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 }; 

@@ -6,6 +6,8 @@ const feedbackSchema = new mongoose.Schema({
   washingPlace: { type: mongoose.Schema.Types.ObjectId, ref: 'WashingPlace', required: true },
   rating: { type: Number, min: 1, max: 5, required: true },
   comment: { type: String },
+  complaint: { type: String }, // optional complaint field
+  photo: { type: String }, // URL or base64 string for car photo after wash
 }, { timestamps: true });
 
 module.exports = mongoose.model('Feedback', feedbackSchema); 

@@ -9,6 +9,7 @@ const packageSchema = new mongoose.Schema({
   washes: { type: Number, required: true },
   savings: { type: Number, required: true },
   duration: { type: Number, required: true }, // in days
+  size: { type: String, enum: ['small', 'medium', 'large'], required: true }, // required car size for this package
 }, { timestamps: true });
 
 module.exports = mongoose.model('Package', packageSchema); 

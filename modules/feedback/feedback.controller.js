@@ -1,4 +1,5 @@
 const Feedback = require('./feedback.model');
+const Wash = require('../wash/wash.model');
 
 exports.createFeedback = async (req, res) => {
   try {
@@ -55,5 +56,30 @@ exports.getFeedbacksForWashingPlace = async (req, res) => {
     res.json(feedbacks);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+exports.createFeedbackForWash = async (req, res) => {
+  try {
+    const { washId, rating, comment, complaint, tip } = req.body;
+    const wash = await Wash.findOne({ _id: washId, user: req.user._id });
+    if (!wash) return res.status(404).json({ error: 'Wash not found' });
+    // Create feedback
+    const feedback = new Feedback({
+      user: req.user._id,
+      wash: washId,
+      washingPlace: wash.washingPlace,
+      rating,
+      comment,
+      complaint,
+    });
+    await feedback.save();
+    // Update wash with feedback and tip
+    wash.feedback = feedback._id;
+    if (tip) wash.tip = tip;
+    await wash.save();
+    res.status(201).json({ feedback, wash });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 }; 

@@ -7,6 +7,8 @@ const washSchema = new mongoose.Schema({
   package: { type: mongoose.Schema.Types.ObjectId, ref: 'Package', required: true },
   date: { type: Date, default: Date.now },
   status: { type: String, enum: ['scheduled', 'completed', 'cancelled'], default: 'scheduled' },
+  feedback: { type: mongoose.Schema.Types.ObjectId, ref: 'Feedback' },
+  tip: { type: Number, default: 0 },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Wash', washSchema); 

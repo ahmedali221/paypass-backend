@@ -9,5 +9,6 @@ router.get('/:id', feedbackController.getFeedback);
 router.put('/:id', auth, feedbackController.updateFeedback);
 router.delete('/:id', auth, feedbackController.deleteFeedback);
 router.get('/washingPlace/:washingPlaceId', feedbackController.getFeedbacksForWashingPlace);
+router.post('/for-wash', auth, feedbackController.createFeedbackForWash);
 
 module.exports = router; 

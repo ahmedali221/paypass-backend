@@ -8,5 +8,6 @@ router.get('/', auth, washController.getWashes);
 router.get('/:id', auth, washController.getWash);
 router.put('/:id', auth, washController.updateWash);
 router.delete('/:id', auth, washController.deleteWash);
+router.post('/scan-barcode', washController.scanBarcodeAndDeductWash);
 
 module.exports = router; 
