@@ -2,9 +2,12 @@ const express = require('express');
 const router = express.Router();
 const userController = require('./user.controller');
 const auth = require('../../middleware/auth');
+const socialAuth = require('./socialAuth.controller');
 
 router.post('/register', userController.register);
 router.post('/login', userController.login);
+router.post('/login/google', socialAuth.loginWithGoogle);
+router.post('/login/apple', socialAuth.loginWithApple);
 router.get('/profile', auth, userController.getProfile);
 router.put('/profile', auth, userController.updateProfile);
 router.delete('/profile', auth, userController.deleteProfile);
