@@ -486,20 +486,16 @@ exports.handlePaymentResult = async (req, res) => {
         }
         
         console.log('Payment successful');
-        const params = new URLSearchParams({
+        return res.status(200).json({
           success: true,
-          id: transactionId,
+          transactionId,
           status: paymentStatus,
           message: paymentMessage,
-          paymentId: payment._id?.toString(),
-          userPackageId: userPackage._id?.toString(),
+          paymentId: payment._id,
+          userPackageId: userPackage._id,
           qrCode: barcode,
-          userId: finalUserId,
-          packageId: finalPackageId,
-          carId: finalCarId
+          data: response.data
         });
-        const resultUrl = `${req.protocol}://${req.get('host')}/payment-result.html?${params.toString()}`;
-        return res.redirect(resultUrl);
       } catch (dbError) {
         console.error('Database error creating records:', dbError);
         return res.status(500).json({
@@ -513,17 +509,13 @@ exports.handlePaymentResult = async (req, res) => {
     } else {
       // Payment failed
       console.log('Payment failed:', paymentStatus);
-      const params = new URLSearchParams({
+      return res.status(400).json({
         success: false,
-        id: transactionId,
+        transactionId,
         status: paymentStatus,
         message: paymentMessage,
-        userId: finalUserId,
-        packageId: finalPackageId,
-        carId: finalCarId
+        data: response.data
       });
-      const resultUrl = `${req.protocol}://${req.get('host')}/payment-result.html?${params.toString()}`;
-      return res.redirect(resultUrl);
     }
   } catch (error) {
     console.error('Payment result handler error:', error);
