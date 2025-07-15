@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   phone: { type: String, required: true, unique: true },
-  password: { type: String, required: false }, // Made optional for social logins
+  password: { type: String, required: true },
   role: { type: String, enum: ['owner', 'user'], default: 'user' },
   referralCode: { type: String, unique: true },
   referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -13,8 +13,6 @@ const userSchema = new mongoose.Schema({
   otp: { type: String },
   otpExpires: { type: Date },
   cars: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Car' }],
-  googleId: { type: String, unique: true, sparse: true },
-  appleId: { type: String, unique: true, sparse: true },
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {

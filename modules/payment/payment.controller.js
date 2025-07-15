@@ -9,6 +9,10 @@ const User = require('../user/user.model');
 const { sendNotification } = require('../../services/notification');
 const axios = require('axios');
 
+// Use the same entityId and accessToken as the working HTML code
+const ENTITY_ID = '8ac7a4c897f92ba00198037be75705a7';
+const ACCESS_TOKEN = 'OGFjN2E0Yzg5N2Y5MmJhMDAxOTgwMzdiOTFlYzA1YTN8NWEjekt5d00yUFJiYWVnakthNDU=';
+
 exports.createPayment = async (req, res) => {
   try {
     const { package: packageId, car: carId, amount, method } = req.body;
@@ -159,7 +163,7 @@ exports.createHyperpayCheckout = async (req, res) => {
     } = req.body;
 
     const data = new URLSearchParams({
-      entityId: '8ac7a4c79483092601948366b9d1011b',
+      entityId: ENTITY_ID,
       amount,
       currency,
       paymentType: 'DB',
@@ -181,7 +185,7 @@ exports.createHyperpayCheckout = async (req, res) => {
       data,
       {
         headers: {
-          Authorization: 'Bearer OGFjN2E0Yzc5NDgzMDkyNjAxOTQ4MzY2MzY1ZDAxMTZ8NnpwP1Q9Y3dGTiUyYWN6NmFmQWo=',
+          Authorization: `Bearer ${ACCESS_TOKEN}`,
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       }
@@ -191,7 +195,7 @@ exports.createHyperpayCheckout = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.response?.data || error.message });
   }
-}; 
+};
 
 // Test endpoint for payment result (for debugging)
 exports.testPaymentResult = async (req, res) => {
@@ -252,10 +256,10 @@ exports.handlePaymentResult = async (req, res) => {
       hyperpayUrl,
       {
         headers: {
-          Authorization: 'Bearer OGFjN2E0Yzc5NDgzMDkyNjAxOTQ4MzY2MzY1ZDAxMTZ8NnpwP1Q9Y3dGTiUyYWN6NmFmQWo='
+          Authorization: `Bearer ${ACCESS_TOKEN}`
         },
         params: {
-          entityId: '8ac7a4c79483092601948366b9d1011b' // Add the required entityId
+          entityId: ENTITY_ID // Add the required entityId
         }
       }
     );
