@@ -40,7 +40,7 @@ exports.createPayment = async (req, res) => {
     const userPackage = new UserPackage({
       user: req.user._id,
       package: packageId,
-      car: carId,
+      carSize: car.size, // Use car's size instead of car ID
       barcode,
       barcodeImage,
       washesLeft: pkg.washes,
@@ -67,7 +67,7 @@ exports.createPayment = async (req, res) => {
           const rewardPackage = new UserPackage({
             user: req.user.referredBy,
             package: packageId, // or a special reward package if you want
-            car: null, // No car associated for reward
+            carSize: car.size, // Use car's size for reward
             barcode: crypto.randomBytes(12).toString('hex'),
             barcodeImage: '',
             washesLeft: 2,
@@ -408,7 +408,7 @@ exports.handlePaymentResult = async (req, res) => {
         const userPackageData = {
           user: finalUserId,
           package: finalPackageId,
-          car: finalCarId,
+          carSize: 'sedan', // Default car size for testing
           barcode,
           barcodeImage,
           washesLeft: pkg ? pkg.washes : 5, // Default 5 washes if package not found
@@ -447,7 +447,7 @@ exports.handlePaymentResult = async (req, res) => {
                 const rewardPackage = new UserPackage({
                   user: user.referredBy,
                   package: finalPackageId,
-                  car: null,
+                  carSize: 'sedan', // Default car size for reward
                   barcode: crypto.randomBytes(12).toString('hex'),
                   barcodeImage: '',
                   washesLeft: 2,
@@ -589,7 +589,7 @@ exports.createPaymentFromHyperPay = async (req, res) => {
     const userPackage = new UserPackage({
       user: req.user._id,
       package: packageId,
-      car: carId,
+      carSize: car.size, // Use car's size instead of car ID
       barcode,
       barcodeImage,
       washesLeft: pkg.washes,
@@ -613,7 +613,7 @@ exports.createPaymentFromHyperPay = async (req, res) => {
           const rewardPackage = new UserPackage({
             user: req.user.referredBy,
             package: packageId,
-            car: null,
+            carSize: car.size, // Use car's size for reward
             barcode: crypto.randomBytes(12).toString('hex'),
             barcodeImage: '',
             washesLeft: 2,
@@ -627,7 +627,6 @@ exports.createPaymentFromHyperPay = async (req, res) => {
         referral.status = 'rewarded';
         referral.rewardGiven = true;
         await referral.save();
-        
         await sendNotification({
           user: req.user.referredBy,
           type: 'referral',

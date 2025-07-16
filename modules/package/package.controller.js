@@ -1,7 +1,6 @@
 const UserPackage = require("./userPackage.model");
 const Wash = require("../wash/wash.model");
 const User = require("../user/user.model");
-const Car = require("../car/car.model");
 const Package = require("./package.model");
 const WashingPlace = require("../washingPlace/washingPlace.model");
 const { sendNotification } = require("../../services/notification");
@@ -72,7 +71,7 @@ exports.scanQRCode = async (req, res) => {
     }
     // Find the user package by barcode
     const userPackage = await UserPackage.findOne({ barcode }).populate(
-      "user car package"
+      "user package"
     );
     if (!userPackage) {
       return res.status(404).json({ error: "User package not found" });
@@ -100,7 +99,6 @@ exports.scanQRCode = async (req, res) => {
     // Create a new wash record
     const wash = new Wash({
       user: userPackage.user._id,
-      car: userPackage.car._id,
       washingPlace: washingPlaceId,
       package: userPackage.package._id,
       status: "scheduled",
@@ -116,7 +114,7 @@ exports.scanQRCode = async (req, res) => {
           "يرجى تقييم تجربتك مع محطة الغسيل وإضافة صورة لسيارتك بعد الغسيل!",
         relatedWash: wash._id,
       });
-    }, 30 * 60 * 1000); // 30 minutes in milliseconds
+    }, 30 * 60 * 1000);
 
     res.json({
       message: "Wash started",
@@ -143,7 +141,7 @@ exports.startWash = async (req, res) => {
     }
     // Find the user package by barcode
     const userPackage = await UserPackage.findOne({ barcode }).populate(
-      "user car package"
+      "user package"
     );
     if (!userPackage) {
       return res.status(404).json({ error: "User package not found" });
@@ -171,7 +169,6 @@ exports.startWash = async (req, res) => {
     // Create a new wash record
     const wash = new Wash({
       user: userPackage.user._id,
-      car: userPackage.car._id,
       washingPlace: washingPlaceId,
       package: userPackage.package._id,
       status: "scheduled",
@@ -212,7 +209,7 @@ exports.scanInfo = async (req, res) => {
     }
     // Find the user package by barcode
     const userPackage = await UserPackage.findOne({ barcode }).populate(
-      "user car package"
+      "user package"
     );
     if (!userPackage) {
       return res.status(404).json({ error: "User package not found" });
@@ -231,10 +228,10 @@ exports.scanInfo = async (req, res) => {
       await userPackage.save();
       return res.status(400).json({ error: "No washes left in this package" });
     }
-    // Return user, car, package, washesLeft
+    // Return user, carSize, package, washesLeft
     res.json({
       user: userPackage.user,
-      car: userPackage.car,
+      carSize: userPackage.carSize,
       package: userPackage.package,
       washesLeft: userPackage.washesLeft,
       expiry: userPackage.expiry,

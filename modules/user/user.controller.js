@@ -62,7 +62,7 @@ exports.deleteProfile = async (req, res) => {
 exports.getActiveUserPackages = async (req, res) => {
   try {
     const userPackages = await UserPackage.find({ user: req.user._id, status: 'active', expiry: { $gt: new Date() } })
-      .populate('package car');
+      .populate('package');
     res.json(userPackages);
   } catch (err) {
     res.status(500).json({ error: err.message });

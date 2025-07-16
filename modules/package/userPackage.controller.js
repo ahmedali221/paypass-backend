@@ -1,14 +1,12 @@
 const UserPackage = require('./userPackage.model');
 const User = require('../user/user.model');
 const Package = require('./package.model');
-const Car = require('../car/car.model');
 
 // Get all user packages for the current user
 exports.getUserPackages = async (req, res) => {
   try {
     const userPackages = await UserPackage.find({ user: req.user._id })
       .populate('package')
-      .populate('car')
       .sort({ createdAt: -1 });
     
     res.json(userPackages);
@@ -24,8 +22,7 @@ exports.getUserPackage = async (req, res) => {
       _id: req.params.id, 
       user: req.user._id 
     })
-    .populate('package')
-    .populate('car');
+    .populate('package');
     
     if (!userPackage) {
       return res.status(404).json({ error: 'User package not found' });
@@ -47,7 +44,6 @@ exports.getActiveUserPackages = async (req, res) => {
       expiry: { $gt: now }
     })
     .populate('package')
-    .populate('car')
     .sort({ createdAt: -1 });
     
     res.json(activeUserPackages);
@@ -65,7 +61,7 @@ exports.updateUserPackage = async (req, res) => {
       { _id: req.params.id, user: req.user._id },
       { washesLeft, status, expiry },
       { new: true }
-    ).populate('package').populate('car');
+    ).populate('package');
     
     if (!userPackage) {
       return res.status(404).json({ error: 'User package not found' });
@@ -179,7 +175,6 @@ exports.getUserPackageById = async (req, res) => {
   try {
     const userPackage = await UserPackage.findById(req.params.id)
       .populate('package')
-      .populate('car')
       .populate('user');
     
     if (!userPackage) {
@@ -215,7 +210,6 @@ exports.getUserPackagesByUserId = async (req, res) => {
 
     const userPackages = await UserPackage.find({ user: userId })
       .populate('package')
-      .populate('car')
       .populate('user')
       .sort({ createdAt: -1 });
     

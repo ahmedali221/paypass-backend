@@ -17,7 +17,7 @@ exports.createWash = async (req, res) => {
 exports.getWashes = async (req, res) => {
   try {
     const washes = await Wash.find({ user: req.user._id })
-      .populate('car washingPlace package feedback');
+      .populate('washingPlace package feedback');
     res.json(washes);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -26,7 +26,7 @@ exports.getWashes = async (req, res) => {
 
 exports.getWash = async (req, res) => {
   try {
-    const wash = await Wash.findOne({ _id: req.params.id, user: req.user._id }).populate('car washingPlace package');
+    const wash = await Wash.findOne({ _id: req.params.id, user: req.user._id }).populate('washingPlace package');
     if (!wash) return res.status(404).json({ error: 'Wash not found' });
     res.json(wash);
   } catch (err) {
@@ -63,7 +63,7 @@ exports.scanBarcodeAndDeductWash = async (req, res) => {
     const { barcode, washingPlace } = req.body;
     // Find active user package by barcode
     const userPackage = await UserPackage.findOne({ barcode, status: 'active', expiry: { $gt: new Date() }, washesLeft: { $gt: 0 } })
-      .populate('user package car');
+      .populate('user package');
     if (!userPackage) return res.status(400).json({ error: 'Invalid or expired barcode, or no washes left' });
     // Deduct a wash
     userPackage.washesLeft -= 1;
@@ -72,7 +72,6 @@ exports.scanBarcodeAndDeductWash = async (req, res) => {
     // Create wash record
     const wash = new Wash({
       user: userPackage.user._id,
-      car: userPackage.car._id,
       washingPlace,
       package: userPackage.package._id,
       status: 'completed',
@@ -87,7 +86,7 @@ exports.scanBarcodeAndDeductWash = async (req, res) => {
     });
     res.json({
       user: userPackage.user,
-      car: userPackage.car,
+      carSize: userPackage.carSize,
       package: userPackage.package,
       washesLeft: userPackage.washesLeft,
       expiry: userPackage.expiry,
