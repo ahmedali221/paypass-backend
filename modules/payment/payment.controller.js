@@ -298,9 +298,20 @@ exports.handlePaymentResult = async (req, res) => {
         // In a real implementation, you'd get the order details from session or database
         const userId = req.query.userId || '64f1a2b3c4d5e6f7a8b9c0d1'; // Default user ID for testing
         const packageId = req.query.packageId || '64f1a2b3c4d5e6f7a8b9c0d2'; // Default package ID for testing
-        const carId = req.query.carId || '64f1a2b3c4d5e6f7a8b9c0d3'; // Default car ID for testing
+        const carSize = req.query.carSize;
         
-        console.log('Received IDs:', { userId, packageId, carId });
+        // Validate carSize
+        const allowedCarSizes = ['sedan', 'suv', 'truck', 'van', 'luxury'];
+        if (!carSize || !allowedCarSizes.includes(carSize)) {
+          return res.status(400).json({
+            success: false,
+            transactionId,
+            status: 'error',
+            message: 'carSize is required and must be one of: ' + allowedCarSizes.join(', '),
+          });
+        }
+        
+        console.log('Received IDs:', { userId, packageId, carSize });
         
         // Validate that the IDs are valid MongoDB ObjectIds or handle string IDs
         const isValidObjectId = (id) => {
@@ -310,9 +321,8 @@ exports.handlePaymentResult = async (req, res) => {
         // If the IDs are not valid ObjectIds, we'll use default ones for demo purposes
         const finalUserId = isValidObjectId(userId) ? userId : '64f1a2b3c4d5e6f7a8b9c0d1';
         const finalPackageId = isValidObjectId(packageId) ? packageId : '64f1a2b3c4d5e6f7a8b9c0d2';
-        const finalCarId = isValidObjectId(carId) ? carId : '64f1a2b3c4d5e6f7a8b9c0d3';
         
-        console.log('Final IDs:', { finalUserId, finalPackageId, finalCarId });
+        console.log('Final IDs:', { finalUserId, finalPackageId });
         
         const paymentData = {
           user: finalUserId,
@@ -352,7 +362,7 @@ exports.handlePaymentResult = async (req, res) => {
           const testUserPackage = new UserPackage({
             user: finalUserId,
             package: finalPackageId,
-            car: finalCarId,
+            carSize: carSize,
             barcode: 'test-barcode-' + Date.now(),
             barcodeImage: '',
             washesLeft: 1,
@@ -408,7 +418,7 @@ exports.handlePaymentResult = async (req, res) => {
         const userPackageData = {
           user: finalUserId,
           package: finalPackageId,
-          carSize: 'sedan', // Default car size for testing
+          carSize: carSize, // Use carSize from request
           barcode,
           barcodeImage,
           washesLeft: pkg ? pkg.washes : 5, // Default 5 washes if package not found
@@ -447,7 +457,7 @@ exports.handlePaymentResult = async (req, res) => {
                 const rewardPackage = new UserPackage({
                   user: user.referredBy,
                   package: finalPackageId,
-                  carSize: 'sedan', // Default car size for reward
+                  carSize: carSize, // Default car size for reward
                   barcode: crypto.randomBytes(12).toString('hex'),
                   barcodeImage: '',
                   washesLeft: 2,
