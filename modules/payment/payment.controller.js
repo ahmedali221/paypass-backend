@@ -519,13 +519,7 @@ exports.handlePaymentResult = async (req, res) => {
     } else {
       // Payment failed
       console.log('Payment failed:', paymentStatus);
-      return res.status(400).json({
-        success: false,
-        transactionId,
-        status: paymentStatus,
-        message: paymentMessage,
-        data: response.data
-      });
+      return res.redirect('https://mellifluous-eclair-f3f079.netlify.app/payment-result.html?status=fail');
     }
   } catch (error) {
     console.error('Payment result handler error:', error);
