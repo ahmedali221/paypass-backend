@@ -496,16 +496,7 @@ exports.handlePaymentResult = async (req, res) => {
         }
         
         console.log('Payment successful');
-        return res.status(200).json({
-          success: true,
-          transactionId,
-          status: paymentStatus,
-          message: paymentMessage,
-          paymentId: payment._id,
-          userPackageId: userPackage._id,
-          qrCode: barcode,
-          data: response.data
-        });
+        return res.redirect('https://mellifluous-eclair-f3f079.netlify.app/payment-result.html?status=success');
       } catch (dbError) {
         console.error('Database error creating records:', dbError);
         return res.status(500).json({
