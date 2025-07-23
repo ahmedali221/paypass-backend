@@ -5,6 +5,7 @@ const auth = require('../../middleware/auth');
 
 router.post('/', auth, washController.createWash);
 router.get('/', auth, washController.getWashes);
+router.get('/by-owner', auth, washController.getWashesByOwner);
 router.get('/:id', auth, washController.getWash);
 router.put('/:id', auth, washController.updateWash);
 router.delete('/:id', auth, washController.deleteWash);

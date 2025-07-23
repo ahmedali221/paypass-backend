@@ -75,6 +75,7 @@ exports.scanBarcodeAndDeductWash = async (req, res) => {
       washingPlace,
       package: userPackage.package._id,
       status: 'completed',
+      owner: req.user._id, // set owner to the scanning owner
     });
     await wash.save();
     // Send feedback notification
@@ -94,5 +95,16 @@ exports.scanBarcodeAndDeductWash = async (req, res) => {
     });
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+};
+
+// Get all washes performed by the current owner
+exports.getWashesByOwner = async (req, res) => {
+  try {
+    const washes = await Wash.find({ owner: req.user._id })
+      .populate('user package washingPlace');
+    res.json(washes);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 }; 
