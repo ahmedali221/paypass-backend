@@ -15,5 +15,9 @@ router.post('/reward-referral', auth, userController.rewardReferral);
 router.post('/send-otp', auth, userController.sendOTP);
 router.post('/verify-otp', auth, userController.verifyOTP);
 router.get('/referral-status', auth, userController.getReferralStatus);
+router.post('/phone-login-initiate', userController.phoneLoginInitiate);
+router.post('/phone-login-verify', userController.phoneLoginVerify);
+router.post('/phone-signup-initiate', userController.phoneSignupInitiate);
+router.post('/phone-signup-verify', userController.phoneSignupVerify);
 
 module.exports = router; 
