@@ -18,5 +18,6 @@ router.put('/:id', auth, paymentController.updatePayment);
 router.delete('/:id', auth, paymentController.deletePayment);
 router.post('/hyperpay-checkout', auth, paymentController.createHyperpayCheckout);
 router.post('/create-from-hyperpay', auth, paymentController.createPaymentFromHyperPay);
+router.post('/create-tip-from-hyperpay', auth, paymentController.createTipPaymentFromHyperPay);
 
 module.exports = router; 

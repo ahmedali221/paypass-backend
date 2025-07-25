@@ -646,3 +646,34 @@ exports.createPaymentFromHyperPay = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 }; 
+
+// Create tip payment from HyperPay result
+exports.createTipPaymentFromHyperPay = async (req, res) => {
+  try {
+    const { transactionId, station, amount, method = 'hyperpay' } = req.body;
+    // Optionally validate station exists
+    // const WashStation = require('../washingPlace/washingPlace.model');
+    // const washStation = await WashStation.findById(station);
+    // if (!washStation) return res.status(400).json({ error: 'Station not found' });
+
+    // Create payment record
+    const payment = new Payment({
+      user: req.user._id,
+      station,
+      amount,
+      method,
+      status: 'completed',
+      transactionId,
+      type: 'tip',
+    });
+    await payment.save();
+
+    res.status(201).json({
+      success: true,
+      payment,
+      message: 'Tip payment completed successfully'
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}; 
